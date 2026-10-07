@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+<script>
+    (function() {
+        var user = prompt("Introduce el usuario:");
+        var pass = prompt("Introduce la contraseña:");
+        if (user !== "easo" || pass !== "easo2026") {
+            document.documentElement.innerHTML = "<h1>Acceso no autorizado</h1>";
+            throw new Error("Acceso denegado");
+        }
+    })();
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaintza Ekosistema - Dashboard Bateratua</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- AlpineJS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- PapaParse para CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body :class="darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'" class="font-sans antialiased min-h-screen p-6 transition-colors duration-300" x-data="dashboardData()" x-init="init()" :style="darkMode ? 'background-color: #0f172a;' : 'background-color: #f8fafc;'">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- CABECERA -->
+        <header :class="darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-100 text-slate-900'" class="p-6 rounded-2xl shadow-sm border flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors">
+            <div>
+                <h1 class="text-2xl font-bold">Zaintza Ekosistema - Dashboard Bateratua</h1>
+                <p class="text-sm opacity-70 mt-1">Hainbat Google Sheets-en integrazioa eta liburu-iragazkia</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Botón Modo Oscuro / Claro -->
+                <button @click="darkMode = !darkMode; initCharts()" :class="darkMode ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'" class="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
+                    <span x-show="!darkMode">🌙 Modu Iluna</span>
+                    <span x-show="darkMode">☀ Modu Argia</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- SECCIÓN DE GRÁFICOS -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-show="rows.length > 0">
+            <template x-for="(chartTitle, chartKey) in { libro: 'Iturri Liburua', curso: 'Ikasturtea Banaketa', mintegia: 'Mintegiak', iturria: 'Informazio Iturriak (C)', egoera1: '1. Periodoko Egoera (H)', egoera2: '2. Periodoko Egoera (L)' }">
+                <div :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-4 rounded-2xl shadow-sm border flex flex-col items-center transition-colors">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-2" x-text="chartTitle"></h3>
+                    <div class="w-full h-48 relative flex items-center justify-center">
+                        <canvas :id="'chart_' + chartKey"></canvas>
+                    </div>
+                </div>
+            </template>
+        </section>
+
+        <!-- PANEL DE FILTROS -->
+        <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-6 rounded-2xl shadow-sm border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 transition-colors">
+            <div>
+                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">Liburua (Jatorria)</label>
+                <select x-model="selectedLibro" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Guztiak (Liburu denak)</option>
+                    <template x-for="libro in uniqueLibros" :key="libro">
+                        <option :value="libro" x-text="libro"></option>
+                    </template>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">1. Ikasturtea (A)</label>
+                <select x-model="selectedCurso" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Guztiak (Denak)</option>
+                    <template x-for="curso in uniqueCursos" :key="curso">
+                        <option :value="curso" x-text="curso"></option>
+                    </template>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">2. Mintegia (B)</label>
+                <select x-model="selectedMintegia" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Guztiak (Denak)</option>
+                    <template x-for="mintegia in uniqueMintegias" :key="mintegia">
+                        <option :value="mintegia" x-text="mintegia"></option>
+                    </template>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">3. Egoera 1. Periodoa (H)</label>
+                <select x-model="selectedEgoera1" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Guztiak (Denak)</option>
+                    <template x-for="eg in uniqueEgoera1" :key="eg">
+                        <option :value="eg" x-text="eg"></option>
+                    </template>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">4. Egoera 2. Periodoa (L)</label>
+                <select x-model="selectedEgoera2" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Guztiak (Denak)</option>
+                    <template x-for="eg in uniqueEgoera2" :key="eg">
+                        <option :value="eg" x-text="eg"></option>
+                    </template>
+                </select>
+            </div>
+        </section>
+
+        <!-- BARRA DE ESTADO -->
+        <div class="flex justify-between items-center px-2">
+            <span class="text-xs font-semibold opacity-70 uppercase tracking-wider" x-text="'Erakusten: ' + filteredRows.length + ' erregistro'"></span>
+        </div>
+
+        <!-- TABLA DE RESULTADOS -->
+        <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="rounded-2xl shadow-sm border overflow-hidden transition-colors">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-100 text-slate-500'" class="border-b text-xs font-bold uppercase tracking-wider">
+                            <th class="p-4">Liburua</th>
+                            <th class="p-4">Ikasturtea</th>
+                            <th class="p-4">Mintegia</th>
+                            <th class="p-4">Iturria / Esteka (C-D)</th>
+                            <th class="p-4">1. Jarraipena (E)</th>
+                            <th class="p-4">Egoera 1 (H)</th>
+                            <th class="p-4">2. Jarraipena (I)</th>
+                            <th class="p-4">Egoera 2 (L)</th>
+                        </tr>
+                    </thead>
+                    <tbody :class="darkMode ? 'divide-slate-700' : 'divide-slate-100'" class="divide-y text-sm">
+                        <template x-for="row in filteredRows" :key="row.id">
+                            <tr :class="darkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50/50'" class="transition">
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-500" x-text="row.libro"></span>
+                                </td>
+                                <td class="p-4 font-medium" x-text="row.curso"></td>
+                                <td class="p-4 font-semibold text-slate-700 dark:text-slate-300" x-text="row.mintegia"></td>
+                                <td class="p-4">
+                                    <div class="text-xs text-indigo-400 font-medium" x-text="'Iturria: ' + row.iturria"></div>
+                                    <a :href="row.link" target="_blank" class="text-xs opacity-60 hover:underline truncate block max-w-xs mt-1" x-text="row.link"></a>
+                                </td>
+                                <td class="p-4 opacity-80" x-text="row.jarraipena1"></td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500" x-text="row.egoera1"></span>
+                                </td>
+                                <td class="p-4 opacity-80" x-text="row.jarraipena2"></td>
+                                <td class="p-4">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500" x-text="row.egoera2"></span>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="filteredRows.length === 0">
+                            <tr>
+                                <td colspan="8" class="p-12 text-center opacity-50">
+                                    <p class="font-medium">Datuak kargatzen...</p>
+                                    <p class="text-xs mt-1">Google Sheets ezberdinetatik konexioa ezartzen ari da.</p>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function dashboardData() {
+            return {
+                rows: [],
+                darkMode: false,
+                selectedLibro: '',
+                selectedCurso: '',
+                selectedMintegia: '',
+                selectedEgoera1: '',
+                selectedEgoera2: '',
+                charts: {},
+
+                init() {
+                    this.loadAllGoogleSheets();
+                },
+
+                loadAllGoogleSheets() {
+                    // Asignamos un nombre legible a cada libro según el orden del array
+                    const sheetsConfig = [
+                        { name: '01.- ESTRATEGIA', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSN5pK9Dn9esNdcnjuYeU7utXIzx1YLhcfQ96KZrO1IIGsa5r4xXtCwoOVsnaKU1rZZsdzheEIINBlj/pub?gid=1194051936&single=true&output=csv' },
+                        { name: '02.- OPERATIBA', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSVcp911-20UPT0C_jlJB0TT2Y5l3rCwLlcfMRziXc0uR4s5uv3lt2u0y8V2L1SmiFY8vKJgWWmHaLl/pub?gid=1194051936&single=true&output=csv' },
+                        { name: '03.- SORTZAILEA', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSONa6aFXJG3Zbo3gD5WIVq0escct1VtAp6pKvw4C13C2QC-zxlHE9Z6PCEcWCJCgXzw_UWdINfFdte/pub?gid=1194051936&single=true&output=csv' },
+                        { name: '04.1.- ZERBITZUAK', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-_38aaBI1MgmlqFoI5YuE7O4mCZBYcTfywHCzv2QdCbdCbLt_WXnR9h-FtM5iXc9IHDtW5u6aj4Rn/pub?gid=1194051936&single=true&output=csv' }
+                    ];
+
+                    let allParsedData = [];
+                    let completedRequests = 0;
+
+                    sheetsConfig.forEach((sheet, sheetIndex) => {
+                        Papa.parse(sheet.url, {
+                            download: true,
+                            header: false,
+                            complete: (results) => {
+                                results.data.forEach((cols, index) => {
+                                    const cursoVal = cols[0] ? cols[0].trim() : '';
+                                    const mintegiaVal = cols[1] ? cols[1].trim() : '';
+                                    
+                                    const lowerCurso = cursoVal.toLowerCase();
+                                    const lowerMintegia = mintegiaVal.toLowerCase();
+
+                                    // Filtramos cabeceras y filas de metadatos
+                                    if (cols.length >= 12 && cursoVal !== '' && 
+                                        !lowerCurso.includes('ikasturtea') && 
+                                        !lowerCurso.includes('mikel') && 
+                                        !lowerCurso.includes('arduraduna') &&
+                                        !lowerMintegia.includes('arduraduna') &&
+                                        !lowerMintegia.includes('mikel')) {
+                                        
+                                        allParsedData.push({
+                                            id: `${sheetIndex}-${index}`,
+                                            libro: sheet.name,
+                                            curso: cursoVal,
+                                            mintegia: mintegiaVal,
+                                            iturria: cols[2] ? cols[2].trim() : 'Zehaztu gabe',
+                                            link: cols[3] ? cols[3].trim() : '',
+                                            jarraipena1: cols[4] ? cols[4].trim() : '',
+                                            desc1: cols[5] ? cols[5].trim() : '',
+                                            titulo1: cols[6] ? cols[6].trim() : '',
+                                            egoera1: cols[7] ? cols[7].trim() : '',
+                                            jarraipena2: cols[8] ? cols[8].trim() : '',
+                                            desc2: cols[9] ? cols[9].trim() : '',
+                                            titulo2: cols[10] ? cols[10].trim() : '',
+                                            egoera2: cols[11] ? cols[11].trim() : ''
+                                        });
+                                    }
+                                });
+
+                                completedRequests++;
+                                if (completedRequests === sheetsConfig.length) {
+                                    this.rows = allParsedData;
+                                    setTimeout(() => this.initCharts(), 150);
+                                }
+                            },
+                            error: (err) => {
+                                console.error("Errorea fitxategia kargatzean: ", sheet.url, err);
+                                completedRequests++;
+                                if (completedRequests === sheetsConfig.length) {
+                                    this.rows = allParsedData;
+                                    setTimeout(() => this.initCharts(), 150);
+                                }
+                            }
+                        });
+                    });
+                },
+
+                get uniqueLibros() { return [...new Set(this.rows.map(r => r.libro))].filter(Boolean).sort(); },
+                get uniqueCursos() { return [...new Set(this.rows.map(r => r.curso))].filter(Boolean).sort(); },
+                get uniqueMintegias() { return [...new Set(this.rows.map(r => r.mintegia))].filter(Boolean).sort(); },
+                get uniqueEgoera1() { return [...new Set(this.rows.map(r => r.egoera1))].filter(Boolean).sort(); },
+                get uniqueEgoera2() { return [...new Set(this.rows.map(r => r.egoera2))].filter(Boolean).sort(); },
+
+                get filteredRows() {
+                    return this.rows.filter(row => {
+                        return (!this.selectedLibro || row.libro === this.selectedLibro) &&
+                               (!this.selectedCurso || row.curso === this.selectedCurso) &&
+                               (!this.selectedMintegia || row.mintegia === this.selectedMintegia) &&
+                               (!this.selectedEgoera1 || row.egoera1 === this.selectedEgoera1) &&
+                               (!this.selectedEgoera2 || row.egoera2 === this.selectedEgoera2);
+                    });
+                },
+
+                initCharts() {
+                    const dataToUse = this.filteredRows;
+                    const keys = ['libro', 'curso', 'mintegia', 'iturria', 'egoera1', 'egoera2'];
+
+                    const centerTextPlugin = {
+                        id: 'centerText',
+                        beforeDraw(chart) {
+                            const { width, height, ctx } = chart;
+                            ctx.restore();
+                            const fontSize = (height / 110).toFixed(2);
+                            ctx.font = `bold ${fontSize}em sans-serif`;
+                            ctx.textBaseline = 'middle';
+                            ctx.fillStyle = chart.options.plugins.centerText.color || '#334155';
+
+                            const text = chart.options.plugins.centerText.text || '';
+                            const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                            const textY = height / 2 - 4;
+
+                            ctx.fillText(text, textX, textY);
+                            ctx.save();
+                        }
+                    };
+
+                    keys.forEach(key => {
+                        const counts = {};
+                        dataToUse.forEach(r => {
+                            const val = (r[key] && r[key] !== '') ? r[key] : 'Zehaztu gabe';
+                            counts[val] = (counts[val] || 0) + 1;
+                        });
+
+                        const uniqueCount = Object.keys(counts).length;
+                        const canvasId = 'chart_' + key;
+                        const ctx = document.getElementById(canvasId);
+                        if (!ctx) return;
+
+                        if (this.charts[key]) {
+                            this.charts[key].destroy();
+                        }
+
+                        this.charts[key] = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: Object.keys(counts),
+                                datasets: [{
+                                    data: Object.values(counts),
+                                    backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f43f5e', '#a855f7'],
+                                    borderWidth: 2,
+                                    borderColor: this.darkMode ? '#1e293b' : '#ffffff'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '70%',
+                                plugins: {
+                                    legend: { display: false },
+                                    centerText: {
+                                        text: uniqueCount.toString(),
+                                        color: this.darkMode ? '#f8fafc' : '#1e293b'
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                const label = context.label || '';
+                                                const value = context.parsed || 0;
+                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                                return ` ${label}: ${value} erregistro (${percentage})`;
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: [centerTextPlugin]
+                        });
+                    });
+                },
+
+                updateCharts() {
+                    this.initCharts();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
