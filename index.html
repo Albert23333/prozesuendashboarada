@@ -182,69 +182,66 @@
                 },
 
                 loadAllGoogleSheets() {
-                    const url1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSN5pK9Dn9esNdcnjuYeU7utXIzx1YLhcfQ96KZrO1IIGsa5r4xXtCwoOVsnaKU1rZZsdzheEIINBlj/pub?gid=1194051936&single=true&output=csv";
-                    const url2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSVcp911-20UPT0C_jlJB0TT2Y5l3rCwLlcfMRziXc0uR4s5uv3lt2u0y8V2L1SmiFY8vKJgWWmHaLl/pub?gid=1194051936&single=true&output=csv";
-                    const url3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSONa6aFXJG3Zbo3gD5WIVq0escct1VtAp6pKvw4C13C2QC-zxlHE9Z6PCEcWCJCgXzw_UWdINfFdte/pub?gid=1194051936&single=true&output=csv";
-                    const url4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-_38aaBI1MgmlqFoI5YuE7O4mCZBYcTfywHCzv2QdCbdCbLt_WXnR9h-FtM5iXc9IHDtW5u6aj4Rn/pub?gid=1194051936&single=true&output=csv";
+                    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzFBX5bw10WNkn0YeE8KYNDJanEq3iLkhH3lRYPB0NVFq6VdqXW1T3UAglyl_we5awLg/exec';
 
-                    const sheetsConfig = [
-                        { name: '01.- ESTRATEGIA', url: url1 },
-                        { name: '02.- OPERATIBA', url: url2 },
-                        { name: '03.- SORTZAILEA', url: url3 },
-                        { name: '04.1.- ZERBITZUAK', url: url4 }
-                    ];
+                    fetch(scriptUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            let allParsedData = [];
+                            let sheetIndex = 0;
 
-                    let allParsedData = [];
+                            for (const [sheetName, csvText] of Object.entries(data)) {
+                                if (!csvText) {
+                                    sheetIndex++;
+                                    continue;
+                                }
 
-                    // Usamos fetch secuencial o con proxy alternativo (corsproxy.io) para evitar el bloqueo masivo de allorigins
-                    sheetsConfig.forEach((sheet, sheetIndex) => {
-                        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(sheet.url);
+                                Papa.parse(csvText, {
+                                    header: false,
+                                    complete: (results) => {
+                                        results.data.forEach((cols, index) => {
+                                            const cursoVal = cols[0] ? cols[0].trim() : '';
+                                            const mintegiaVal = cols[1] ? cols[1].trim() : '';
+                                            
+                                            const lowerCurso = cursoVal.toLowerCase();
+                                            const lowerMintegia = mintegiaVal.toLowerCase();
 
-                        Papa.parse(proxyUrl, {
-                            download: true,
-                            header: false,
-                            complete: (results) => {
-                                results.data.forEach((cols, index) => {
-                                    const cursoVal = cols[0] ? cols[0].trim() : '';
-                                    const mintegiaVal = cols[1] ? cols[1].trim() : '';
-                                    
-                                    const lowerCurso = cursoVal.toLowerCase();
-                                    const lowerMintegia = mintegiaVal.toLowerCase();
-
-                                    if (cols.length >= 12 && cursoVal !== '' && 
-                                        !lowerCurso.includes('ikasturtea') && 
-                                        !lowerCurso.includes('mikel') && 
-                                        !lowerCurso.includes('arduraduna') &&
-                                        !lowerMintegia.includes('arduraduna') &&
-                                        !lowerMintegia.includes('mikel')) {
-                                        
-                                        allParsedData.push({
-                                            id: `${sheetIndex}-${index}`,
-                                            libro: sheet.name,
-                                            curso: cursoVal,
-                                            mintegia: mintegiaVal,
-                                            iturria: cols[2] ? cols[2].trim() : 'Zehaztu gabe',
-                                            link: cols[3] ? cols[3].trim() : '',
-                                            jarraipena1: cols[4] ? cols[4].trim() : '',
-                                            desc1: cols[5] ? cols[5].trim() : '',
-                                            titulo1: cols[6] ? cols[6].trim() : '',
-                                            egoera1: cols[7] ? cols[7].trim() : '',
-                                            jarraipena2: cols[8] ? cols[8].trim() : '',
-                                            desc2: cols[9] ? cols[9].trim() : '',
-                                            titulo2: cols[10] ? cols[10].trim() : '',
-                                            egoera2: cols[11] ? cols[11].trim() : ''
+                                            if (cols.length >= 12 && cursoVal !== '' && 
+                                                !lowerCurso.includes('ikasturtea') && 
+                                                !lowerCurso.includes('mikel') && 
+                                                !lowerCurso.includes('arduraduna') &&
+                                                !lowerMintegia.includes('arduraduna') &&
+                                                !lowerMintegia.includes('mikel')) {
+                                                
+                                                allParsedData.push({
+                                                    id: `${sheetIndex}-${index}`,
+                                                    libro: sheetName,
+                                                    curso: cursoVal,
+                                                    mintegia: mintegiaVal,
+                                                    iturria: cols[2] ? cols[2].trim() : 'Zehaztu gabe',
+                                                    link: cols[3] ? cols[3].trim() : '',
+                                                    jarraipena1: cols[4] ? cols[4].trim() : '',
+                                                    desc1: cols[5] ? cols[5].trim() : '',
+                                                    titulo1: cols[6] ? cols[6].trim() : '',
+                                                    egoera1: cols[7] ? cols[7].trim() : '',
+                                                    jarraipena2: cols[8] ? cols[8].trim() : '',
+                                                    desc2: cols[9] ? cols[9].trim() : '',
+                                                    titulo2: cols[10] ? cols[10].trim() : '',
+                                                    egoera2: cols[11] ? cols[11].trim() : ''
+                                                });
+                                            }
                                         });
+
+                                        this.rows = [...allParsedData];
+                                        setTimeout(() => this.initCharts(), 150);
                                     }
                                 });
-
-                                this.rows = [...allParsedData];
-                                setTimeout(() => this.initCharts(), 150);
-                            },
-                            error: (err) => {
-                                console.error("Errorea fitxategia kargatzean: ", sheet.url, err);
+                                sheetIndex++;
                             }
+                        })
+                        .catch(err => {
+                            console.error("Errorea konexioan:", err);
                         });
-                    });
                 },
 
                 get uniqueLibros() { return [...new Set(this.rows.map(r => r.libro))].filter(Boolean).sort(); },
