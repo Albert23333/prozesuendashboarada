@@ -45,7 +45,7 @@
 
         <!-- SECCIÓN DE GRÁFICOS -->
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-show="rows.length > 0">
-            <template x-for="(chartTitle, chartKey) in { libro: 'Iturri Liburua', curso: 'Ikasturtea Banaketa', mintegia: 'Mintegiak', iturria: 'Informazio Iturriak (C)', egoera1: '1. Periodoko Egoera (H)', egoera2: '2. Periodoko Egoera (L)' }">
+            <template x-for="(chartTitle, chartKey) in { libro: 'NODOA', curso: 'Ikasturtea Banaketa', mintegia: 'ESPARRUA', iturria: 'Informazio Iturriak (C)', egoera1: '1. Periodoko Egoera (H)', egoera2: '2. Periodoko Egoera (L)' }">
                 <div :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-4 rounded-2xl shadow-sm border flex flex-col items-center transition-colors">
                     <h3 class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-2" x-text="chartTitle"></h3>
                     <div class="w-full h-48 relative flex items-center justify-center">
@@ -58,9 +58,9 @@
         <!-- PANEL DE FILTROS -->
         <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-6 rounded-2xl shadow-sm border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 transition-colors">
             <div>
-                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">Liburua (Jatorria)</label>
-                <select x-model="selectedLibro" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Guztiak (Liburu denak)</option>
+                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">NODOA</label>
+                <select x-model="selectedLibro" @change="selectedMintegia = ''; updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Guztiak (Nodo denak)</option>
                     <template x-for="libro in uniqueLibros" :key="libro">
                         <option :value="libro" x-text="libro"></option>
                     </template>
@@ -78,7 +78,7 @@
             </div>
 
             <div>
-                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">2. Mintegia (B)</label>
+                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">ESPARRUA</label>
                 <select x-model="selectedMintegia" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="mintegia in uniqueMintegias" :key="mintegia">
@@ -119,9 +119,9 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-100 text-slate-500'" class="border-b text-xs font-bold uppercase tracking-wider">
-                            <th class="p-4">Liburua</th>
+                            <th class="p-4">NODOA</th>
                             <th class="p-4">Ikasturtea</th>
-                            <th class="p-4">Mintegia</th>
+                            <th class="p-4">ESPARRUA</th>
                             <th class="p-4">Iturria / Esteka (C-D)</th>
                             <th class="p-4">1. Jarraipena (E)</th>
                             <th class="p-4">Egoera 1 (H)</th>
@@ -182,19 +182,25 @@
                 },
 
                 loadAllGoogleSheets() {
-                    // Asignamos un nombre legible a cada libro según el orden del array
+                    const url1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSN5pK9Dn9esNdcnjuYeU7utXIzx1YLhcfQ96KZrO1IIGsa5r4xXtCwoOVsnaKU1rZZsdzheEIINBlj/pub?gid=1194051936&single=true&output=csv";
+                    const url2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSVcp911-20UPT0C_jlJB0TT2Y5l3rCwLlcfMRziXc0uR4s5uv3lt2u0y8V2L1SmiFY8vKJgWWmHaLl/pub?gid=1194051936&single=true&output=csv";
+                    const url3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSONa6aFXJG3Zbo3gD5WIVq0escct1VtAp6pKvw4C13C2QC-zxlHE9Z6PCEcWCJCgXzw_UWdINfFdte/pub?gid=1194051936&single=true&output=csv";
+                    const url4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-_38aaBI1MgmlqFoI5YuE7O4mCZBYcTfywHCzv2QdCbdCbLt_WXnR9h-FtM5iXc9IHDtW5u6aj4Rn/pub?gid=1194051936&single=true&output=csv";
+
                     const sheetsConfig = [
-                        { name: '01.- ESTRATEGIA', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSN5pK9Dn9esNdcnjuYeU7utXIzx1YLhcfQ96KZrO1IIGsa5r4xXtCwoOVsnaKU1rZZsdzheEIINBlj/pub?gid=1194051936&single=true&output=csv' },
-                        { name: '02.- OPERATIBA', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSVcp911-20UPT0C_jlJB0TT2Y5l3rCwLlcfMRziXc0uR4s5uv3lt2u0y8V2L1SmiFY8vKJgWWmHaLl/pub?gid=1194051936&single=true&output=csv' },
-                        { name: '03.- SORTZAILEA', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSONa6aFXJG3Zbo3gD5WIVq0escct1VtAp6pKvw4C13C2QC-zxlHE9Z6PCEcWCJCgXzw_UWdINfFdte/pub?gid=1194051936&single=true&output=csv' },
-                        { name: '04.1.- ZERBITZUAK', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-_38aaBI1MgmlqFoI5YuE7O4mCZBYcTfywHCzv2QdCbdCbLt_WXnR9h-FtM5iXc9IHDtW5u6aj4Rn/pub?gid=1194051936&single=true&output=csv' }
+                        { name: '01.- ESTRATEGIA', url: url1 },
+                        { name: '02.- OPERATIBA', url: url2 },
+                        { name: '03.- SORTZAILEA', url: url3 },
+                        { name: '04.1.- ZERBITZUAK', url: url4 }
                     ];
 
                     let allParsedData = [];
                     let completedRequests = 0;
 
                     sheetsConfig.forEach((sheet, sheetIndex) => {
-                        Papa.parse(sheet.url, {
+                        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(sheet.url);
+
+                        Papa.parse(proxyUrl, {
                             download: true,
                             header: false,
                             complete: (results) => {
@@ -205,7 +211,6 @@
                                     const lowerCurso = cursoVal.toLowerCase();
                                     const lowerMintegia = mintegiaVal.toLowerCase();
 
-                                    // Filtramos cabeceras y filas de metadatos
                                     if (cols.length >= 12 && cursoVal !== '' && 
                                         !lowerCurso.includes('ikasturtea') && 
                                         !lowerCurso.includes('mikel') && 
@@ -252,7 +257,16 @@
 
                 get uniqueLibros() { return [...new Set(this.rows.map(r => r.libro))].filter(Boolean).sort(); },
                 get uniqueCursos() { return [...new Set(this.rows.map(r => r.curso))].filter(Boolean).sort(); },
-                get uniqueMintegias() { return [...new Set(this.rows.map(r => r.mintegia))].filter(Boolean).sort(); },
+                
+                // ESPARRUA se filtra de forma dependiente según el NODOA (selectedLibro)
+                get uniqueMintegias() {
+                    let dataFiltered = this.rows;
+                    if (this.selectedLibro) {
+                        dataFiltered = dataFiltered.filter(r => r.libro === this.selectedLibro);
+                    }
+                    return [...new Set(dataFiltered.map(r => r.mintegia))].filter(Boolean).sort();
+                },
+
                 get uniqueEgoera1() { return [...new Set(this.rows.map(r => r.egoera1))].filter(Boolean).sort(); },
                 get uniqueEgoera2() { return [...new Set(this.rows.map(r => r.egoera2))].filter(Boolean).sort(); },
 
