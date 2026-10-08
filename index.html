@@ -195,10 +195,10 @@
                     ];
 
                     let allParsedData = [];
-                    let completedRequests = 0;
 
+                    // Usamos fetch secuencial o con proxy alternativo (corsproxy.io) para evitar el bloqueo masivo de allorigins
                     sheetsConfig.forEach((sheet, sheetIndex) => {
-                        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(sheet.url);
+                        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(sheet.url);
 
                         Papa.parse(proxyUrl, {
                             download: true,
@@ -237,19 +237,11 @@
                                     }
                                 });
 
-                                completedRequests++;
-                                if (completedRequests === sheetsConfig.length) {
-                                    this.rows = allParsedData;
-                                    setTimeout(() => this.initCharts(), 150);
-                                }
+                                this.rows = [...allParsedData];
+                                setTimeout(() => this.initCharts(), 150);
                             },
                             error: (err) => {
                                 console.error("Errorea fitxategia kargatzean: ", sheet.url, err);
-                                completedRequests++;
-                                if (completedRequests === sheetsConfig.length) {
-                                    this.rows = allParsedData;
-                                    setTimeout(() => this.initCharts(), 150);
-                                }
                             }
                         });
                     });
@@ -258,7 +250,6 @@
                 get uniqueLibros() { return [...new Set(this.rows.map(r => r.libro))].filter(Boolean).sort(); },
                 get uniqueCursos() { return [...new Set(this.rows.map(r => r.curso))].filter(Boolean).sort(); },
                 
-                // ESPARRUA se filtra de forma dependiente según el NODOA (selectedLibro)
                 get uniqueMintegias() {
                     let dataFiltered = this.rows;
                     if (this.selectedLibro) {
