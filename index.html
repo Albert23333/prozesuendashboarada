@@ -198,7 +198,7 @@
 
                     // Usamos fetch secuencial o con proxy alternativo (corsproxy.io) para evitar el bloqueo masivo de allorigins
                     sheetsConfig.forEach((sheet, sheetIndex) => {
-                        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(sheet.url);
+                        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(sheet.url);
 
                         Papa.parse(proxyUrl, {
                             download: true,
