@@ -30,8 +30,8 @@
         <!-- CABECERA -->
         <header :class="darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-100 text-slate-900'" class="p-6 rounded-2xl shadow-sm border flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors">
             <div>
-                <h1 class="text-2xl font-bold">Zaintza Ekosistema - Dashboard Bateratua</h1>
-                <p class="text-sm opacity-70 mt-1">Hainbat Google Sheets-en integrazioa eta liburu-iragazkia</p>
+                <h1 class="text-2xl font-bold">Zaintza Ekosistema</h1>
+                <p class="text-sm opacity-70 mt-1">Dashboard Nagusia - Nabigazio eta Kontrol Panela</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
@@ -43,77 +43,162 @@
             </div>
         </header>
 
-        <!-- SECCIÓN DE GRÁFICOS -->
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-show="rows.length > 0">
-            <template x-for="(chartTitle, chartKey) in { libro: 'NODOA', curso: 'Ikasturtea Banaketa', mintegia: 'ESPARRUA', iturria: 'Informazio Iturriak (C)', egoera1: '1. Periodoko Egoera (H)', egoera2: '2. Periodoko Egoera (L)' }">
-                <div :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-4 rounded-2xl shadow-sm border flex flex-col items-center transition-colors">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-2" x-text="chartTitle"></h3>
-                    <div class="w-full h-48 relative flex items-center justify-center">
-                        <canvas :id="'chart_' + chartKey"></canvas>
-                    </div>
-                </div>
-            </template>
-        </section>
-
-        <!-- PANEL DE FILTROS -->
-        <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-6 rounded-2xl shadow-sm border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 transition-colors">
+        <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+        <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-4 rounded-2xl shadow-sm border grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3 transition-colors">
+            <div class="sm:col-span-2">
+                <input type="text" placeholder="Bilatu nodoak, prozesuak edo eremuak..." :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
             <div>
-                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">NODOA</label>
                 <select x-model="selectedLibro" @change="selectedMintegia = ''; updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Guztiak (Nodo denak)</option>
+                    <option value="">Nodo Globala</option>
                     <template x-for="libro in uniqueLibros" :key="libro">
                         <option :value="libro" x-text="libro"></option>
                     </template>
                 </select>
             </div>
-
             <div>
-                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">1. Ikasturtea (A)</label>
                 <select x-model="selectedCurso" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Guztiak (Denak)</option>
+                    <option value="">Prozesu Mota</option>
                     <template x-for="curso in uniqueCursos" :key="curso">
                         <option :value="curso" x-text="curso"></option>
                     </template>
                 </select>
             </div>
-
             <div>
-                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">ESPARRUA</label>
                 <select x-model="selectedMintegia" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Guztiak (Denak)</option>
+                    <option value="">Esparrua</option>
                     <template x-for="mintegia in uniqueMintegias" :key="mintegia">
                         <option :value="mintegia" x-text="mintegia"></option>
                     </template>
                 </select>
             </div>
-
             <div>
-                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">3. Egoera 1. Periodoa (H)</label>
                 <select x-model="selectedEgoera1" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Guztiak (Denak)</option>
+                    <option value="">Egoera 1</option>
                     <template x-for="eg in uniqueEgoera1" :key="eg">
-                        <option :value="eg" x-text="eg"></option>
-                    </template>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">4. Egoera 2. Periodoa (L)</label>
-                <select x-model="selectedEgoera2" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Guztiak (Denak)</option>
-                    <template x-for="eg in uniqueEgoera2" :key="eg">
                         <option :value="eg" x-text="eg"></option>
                     </template>
                 </select>
             </div>
         </section>
 
-        <!-- BARRA DE ESTADO -->
+        <!-- ESTRUCTURA PRINCIPAL SIMÉTRICA (2 PANELES) -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-6" x-show="rows.length > 0">
+
+            <!-- ========================================== -->
+            <!-- PANEL IZQUIERDO: ZAINTZA OROKORRA          -->
+            <!-- ========================================== -->
+            <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-6 rounded-2xl shadow-sm border flex flex-col justify-between transition-colors">
+                <div>
+                    <div class="flex justify-between items-center border-b pb-3 mb-6" :class="darkMode ? 'border-slate-700' : 'border-slate-100'">
+                        <h2 class="text-base font-bold tracking-wider">ZAINTZA OROKORRA</h2>
+                        <!-- Donut central principal -->
+                        <div class="w-24 h-24 relative flex items-center justify-center">
+                            <canvas id="chart_libro"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Métricas y barras simplificadas -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div :class="darkMode ? 'bg-slate-900/50' : 'bg-slate-50'" class="p-4 rounded-xl border border-transparent">
+                            <span class="text-xs font-semibold opacity-70 block mb-1">IKASTURTEA BANAKETA</span>
+                            <span class="text-xl font-bold" x-text="uniqueCursos.length"></span>
+                            <div class="w-full bg-slate-700/20 h-2 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded-full" style="width: 25%"></div>
+                            </div>
+                        </div>
+
+                        <div :class="darkMode ? 'bg-slate-900/50' : 'bg-slate-50'" class="p-4 rounded-xl border border-transparent">
+                            <span class="text-xs font-semibold opacity-70 block mb-1">MINTEGIAK</span>
+                            <span class="text-xl font-bold" x-text="uniqueMintegias.length"></span>
+                            <div class="w-full bg-slate-700/20 h-2 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-amber-500 h-full rounded-full" style="width: 50%"></div>
+                            </div>
+                        </div>
+
+                        <div :class="darkMode ? 'bg-slate-900/50' : 'bg-slate-50'" class="p-4 rounded-xl border border-transparent col-span-2">
+                            <span class="text-xs font-semibold opacity-70 block mb-1">INFORMAZIO ITURRIAK (C)</span>
+                            <span class="text-xl font-bold" x-text="rows.length"></span>
+                            <div class="w-full bg-slate-700/20 h-2 rounded-full mt-2 overflow-hidden flex">
+                                <div class="bg-indigo-500 h-full" style="width: 40%"></div>
+                                <div class="bg-blue-500 h-full" style="width: 30%"></div>
+                                <div class="bg-emerald-500 h-full" style="width: 30%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PIE DE PANEL: LEGENDA IDÉNTICA -->
+                <div :class="darkMode ? 'bg-slate-900/80 border-slate-700' : 'bg-slate-50 border-slate-200'" class="p-4 rounded-xl border mt-auto">
+                    <h3 class="text-xs font-bold uppercase tracking-wider opacity-70 mb-3">LEGENDA</h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Banitszio</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 inline-block"></span> EOP</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Bantitszio</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Informazio ...</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span> Informazio</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> 2%</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PANEL DERECHO: PROZESUEN ZAINTZA           -->
+            <!-- ========================================== -->
+            <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-6 rounded-2xl shadow-sm border flex flex-col justify-between transition-colors">
+                <div>
+                    <div class="flex justify-between items-center border-b pb-3 mb-6" :class="darkMode ? 'border-slate-700' : 'border-slate-100'">
+                        <h2 class="text-base font-bold tracking-wider">PROZESUEN ZAINTZA</h2>
+                    </div>
+
+                    <!-- Métricas y subprocesos -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div :class="darkMode ? 'bg-slate-900/50' : 'bg-slate-50'" class="p-4 rounded-xl border border-transparent">
+                            <span class="text-xs font-semibold opacity-70 block mb-1">ITURRI LIBURUAK</span>
+                            <span class="text-xl font-bold">4</span>
+                            <div class="w-full bg-slate-700/20 h-2 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded-full" style="width: 20%"></div>
+                            </div>
+                        </div>
+
+                        <div :class="darkMode ? 'bg-slate-900/50' : 'bg-slate-50'" class="p-4 rounded-xl border border-transparent">
+                            <span class="text-xs font-semibold opacity-70 block mb-1">1. PERIODOKO EGOERA</span>
+                            <span class="text-xl font-bold" x-text="uniqueEgoera1.length"></span>
+                            <div class="w-full bg-slate-700/20 h-2 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-blue-500 h-full rounded-full" style="width: 65%"></div>
+                            </div>
+                        </div>
+
+                        <div :class="darkMode ? 'bg-slate-900/50' : 'bg-slate-50'" class="p-4 rounded-xl border border-transparent col-span-2">
+                            <span class="text-xs font-semibold opacity-70 block mb-1">ESPARRUEN BANAKETA OROKORRA</span>
+                            <div class="w-full h-24 relative mt-2">
+                                <canvas id="chart_mintegia"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PIE DE PANEL: LEGENDA IDÉNTICA -->
+                <div :class="darkMode ? 'bg-slate-900/80 border-slate-700' : 'bg-slate-50 border-slate-200'" class="p-4 rounded-xl border mt-auto">
+                    <h3 class="text-xs font-bold uppercase tracking-wider opacity-70 mb-3">LEGENDA</h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Banitszio</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500 inline-block"></span> EOP</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Bantitszio</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span> Informazio ...</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-500 inline-block"></span> Informazio</div>
+                        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> 2%</div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- BARRA DE ESTADO Y TABLA -->
         <div class="flex justify-between items-center px-2">
             <span class="text-xs font-semibold opacity-70 uppercase tracking-wider" x-text="'Erakusten: ' + filteredRows.length + ' erregistro'"></span>
         </div>
 
-        <!-- TABLA DE RESULTADOS -->
         <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="rounded-2xl shadow-sm border overflow-hidden transition-colors">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -196,7 +281,6 @@
 
                     let allParsedData = [];
 
-                    // Usamos fetch secuencial o con proxy alternativo (corsproxy.io) para evitar el bloqueo masivo de allorigins
                     sheetsConfig.forEach((sheet, sheetIndex) => {
                         const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(sheet.url);
 
@@ -273,7 +357,7 @@
 
                 initCharts() {
                     const dataToUse = this.filteredRows;
-                    const keys = ['libro', 'curso', 'mintegia', 'iturria', 'egoera1', 'egoera2'];
+                    const keys = ['libro', 'mintegia'];
 
                     const centerTextPlugin = {
                         id: 'centerText',
@@ -328,7 +412,7 @@
                                 plugins: {
                                     legend: { display: false },
                                     centerText: {
-                                        text: uniqueCount.toString(),
+                                        text: dataToUse.length.toString(),
                                         color: this.darkMode ? '#f8fafc' : '#1e293b'
                                     },
                                     tooltip: {
