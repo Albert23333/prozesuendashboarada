@@ -59,7 +59,7 @@
         <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-6 rounded-2xl shadow-sm border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 transition-colors">
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">NODOA</label>
-                <select x-model="selectedLibro" @change="selectedMintegia = ''; updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select x-model="selectedLibro" @change="selectedMintegia = ''; updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Nodo denak)</option>
                     <template x-for="libro in uniqueLibros" :key="libro">
                         <option :value="libro" x-text="libro"></option>
@@ -69,7 +69,7 @@
 
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">1. Ikasturtea (A)</label>
-                <select x-model="selectedCurso" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select x-model="selectedCurso" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="curso in uniqueCursos" :key="curso">
                         <option :value="curso" x-text="curso"></option>
@@ -79,7 +79,7 @@
 
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">ESPARRUA</label>
-                <select x-model="selectedMintegia" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select x-model="selectedMintegia" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="mintegia in uniqueMintegias" :key="mintegia">
                         <option :value="mintegia" x-text="mintegia"></option>
@@ -89,7 +89,7 @@
 
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">3. Egoera 1. Periodoa (H)</label>
-                <select x-model="selectedEgoera1" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select x-model="selectedEgoera1" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="eg in uniqueEgoera1" :key="eg">
                         <option :value="eg" x-text="eg"></option>
@@ -99,7 +99,7 @@
 
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">4. Egoera 2. Periodoa (L)</label>
-                <select x-model="selectedEgoera2" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select x-model="selectedEgoera2" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="eg in uniqueEgoera2" :key="eg">
                         <option :value="eg" x-text="eg"></option>
@@ -182,60 +182,60 @@
                 },
 
                 loadAllGoogleSheets() {
-                    const url1 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSN5pK9Dn9esNdcnjuYeU7utXIzx1YLhcfQ96KZrO1IIGsa5r4xXtCwoOVsnaKU1rZZsdzheEIINBlj/pub?gid=1194051936&single=true&output=csv";
-                    const url2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSVcp911-20UPT0C_jlJB0TT2Y5l3rCwLlcfMRziXc0uR4s5uv3lt2u0y8V2L1SmiFY8vKJgWWmHaLl/pub?gid=1194051936&single=true&output=csv";
-                    const url3 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSONa6aFXJG3Zbo3gD5WIVq0escct1VtAp6pKvw4C13C2QC-zxlHE9Z6PCEcWCJCgXzw_UWdINfFdte/pub?gid=1194051936&single=true&output=csv";
-                    const url4 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-_38aaBI1MgmlqFoI5YuE7O4mCZBYcTfywHCzv2QdCbdCbLt_WXnR9h-FtM5iXc9IHDtW5u6aj4Rn/pub?gid=1194051936&single=true&output=csv";
-
                     const sheetsConfig = [
-                        { name: '01.- ESTRATEGIA', url: url1 },
-                        { name: '02.- OPERATIBA', url: url2 },
-                        { name: '03.- SORTZAILEA', url: url3 },
-                        { name: '04.1.- ZERBITZUAK', url: url4 }
+                        { name: '01.- ESTRATEGIA', url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSN5pK9Dn9esNdcnjuYeU7utXIzx1YLhcfQ96KZrO1IIGsa5r4xXtCwoOVsnaKU1rZZsdzheEIINBlj/pub?gid=1194051936&single=true&output=csv" },
+                        { name: '02.- OPERATIBA', url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSVcp911-20UPT0C_jlJB0TT2Y5l3rCwLlcfMRziXc0uR4s5uv3lt2u0y8V2L1SmiFY8vKJgWWmHaLl/pub?gid=1194051936&single=true&output=csv" },
+                        { name: '03.- SORTZAILEA', url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSONa6aFXJG3Zbo3gD5WIVq0escct1VtAp6pKvw4C13C2QC-zxlHE9Z6PCEcWCJCgXzw_UWdINfFdte/pub?gid=1194051936&single=true&output=csv" },
+                        { name: '04.1.- ZERBITZUAK', url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR-_38aaBI1MgmlqFoI5YuE7O4mCZBYcTfywHCzv2QdCbdCbLt_WXnR9h-FtM5iXc9IHDtW5u6aj4Rn/pub?gid=1194051936&single=true&output=csv" }
                     ];
 
                     let allParsedData = [];
                     let completedRequests = 0;
 
                     sheetsConfig.forEach((sheet, sheetIndex) => {
-                        const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(sheet.url);
+                        // Cambiamos al proxy corsproxy.io para evitar el bloqueo
+                        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(sheet.url);
 
                         Papa.parse(proxyUrl, {
                             download: true,
                             header: false,
                             complete: (results) => {
-                                results.data.forEach((cols, index) => {
-                                    const cursoVal = cols[0] ? cols[0].trim() : '';
-                                    const mintegiaVal = cols[1] ? cols[1].trim() : '';
-                                    
-                                    const lowerCurso = cursoVal.toLowerCase();
-                                    const lowerMintegia = mintegiaVal.toLowerCase();
+                                if (results && results.data) {
+                                    results.data.forEach((cols, index) => {
+                                        if (!cols || cols.length === 0) return;
 
-                                    if (cols.length >= 12 && cursoVal !== '' && 
-                                        !lowerCurso.includes('ikasturtea') && 
-                                        !lowerCurso.includes('mikel') && 
-                                        !lowerCurso.includes('arduraduna') &&
-                                        !lowerMintegia.includes('arduraduna') &&
-                                        !lowerMintegia.includes('mikel')) {
+                                        const cursoVal = cols[0] ? String(cols[0]).trim() : '';
+                                        const mintegiaVal = cols[1] ? String(cols[1]).trim() : '';
                                         
-                                        allParsedData.push({
-                                            id: `${sheetIndex}-${index}`,
-                                            libro: sheet.name,
-                                            curso: cursoVal,
-                                            mintegia: mintegiaVal,
-                                            iturria: cols[2] ? cols[2].trim() : 'Zehaztu gabe',
-                                            link: cols[3] ? cols[3].trim() : '',
-                                            jarraipena1: cols[4] ? cols[4].trim() : '',
-                                            desc1: cols[5] ? cols[5].trim() : '',
-                                            titulo1: cols[6] ? cols[6].trim() : '',
-                                            egoera1: cols[7] ? cols[7].trim() : '',
-                                            jarraipena2: cols[8] ? cols[8].trim() : '',
-                                            desc2: cols[9] ? cols[9].trim() : '',
-                                            titulo2: cols[10] ? cols[10].trim() : '',
-                                            egoera2: cols[11] ? cols[11].trim() : ''
-                                        });
-                                    }
-                                });
+                                        const lowerCurso = cursoVal.toLowerCase();
+                                        const lowerMintegia = mintegiaVal.toLowerCase();
+
+                                        if (cursoVal !== '' && 
+                                            !lowerCurso.includes('ikasturtea') && 
+                                            !lowerCurso.includes('mikel') && 
+                                            !lowerCurso.includes('arduraduna') &&
+                                            !lowerMintegia.includes('arduraduna') &&
+                                            !lowerMintegia.includes('mikel')) {
+                                            
+                                            allParsedData.push({
+                                                id: `${sheetIndex}-${index}`,
+                                                libro: sheet.name,
+                                                curso: cursoVal,
+                                                mintegia: mintegiaVal,
+                                                iturria: cols[2] ? String(cols[2]).trim() : 'Zehaztu gabe',
+                                                link: cols[3] ? String(cols[3]).trim() : '',
+                                                jarraipena1: cols[4] ? String(cols[4]).trim() : '',
+                                                desc1: cols[5] ? String(cols[5]).trim() : '',
+                                                titulo1: cols[6] ? String(cols[6]).trim() : '',
+                                                egoera1: cols[7] ? String(cols[7]).trim() : '',
+                                                jarraipena2: cols[8] ? String(cols[8]).trim() : '',
+                                                desc2: cols[9] ? String(cols[9]).trim() : '',
+                                                titulo2: cols[10] ? String(cols[10]).trim() : '',
+                                                egoera2: cols[11] ? String(cols[11]).trim() : ''
+                                            });
+                                        }
+                                    });
+                                }
 
                                 completedRequests++;
                                 if (completedRequests === sheetsConfig.length) {
@@ -258,7 +258,6 @@
                 get uniqueLibros() { return [...new Set(this.rows.map(r => r.libro))].filter(Boolean).sort(); },
                 get uniqueCursos() { return [...new Set(this.rows.map(r => r.curso))].filter(Boolean).sort(); },
                 
-                // ESPARRUA se filtra de forma dependiente según el NODOA (selectedLibro)
                 get uniqueMintegias() {
                     let dataFiltered = this.rows;
                     if (this.selectedLibro) {
