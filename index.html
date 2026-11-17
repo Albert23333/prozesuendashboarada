@@ -20,45 +20,193 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- PapaParse para CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Chart.js para gráficos -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body :class="darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'" class="font-sans antialiased min-h-screen p-6 transition-colors duration-300" x-data="dashboardData()" x-init="init()">
 
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="max-w-[1600px] mx-auto space-y-6">
         
         <!-- CABECERA -->
-        <header :class="darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-100 text-slate-900'" class="p-6 rounded-2xl shadow-sm border flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors">
+        <header :class="darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'" class="p-6 rounded-2xl shadow-sm border flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-colors">
             <div>
-                <h1 class="text-2xl font-bold">Zaintza Ekosistema - Dashboard Bateratua</h1>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">EKOSISTEMA</span>
+                    <h1 class="text-2xl font-bold">Zaintza Ekosistema - Dashboard Bateratua</h1>
+                </div>
                 <p class="text-sm opacity-70 mt-1">Hainbat Google Sheets-en integrazioa eta liburu-iragazkia</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-                <button @click="darkMode = !darkMode; initCharts()" :class="darkMode ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'" class="px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition cursor-pointer">
+                <button @click="darkMode = !darkMode" :class="darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold border flex items-center gap-2 transition cursor-pointer">
                     <span x-show="!darkMode">🌙 Modu Iluna</span>
                     <span x-show="darkMode">☀ Modu Argia</span>
                 </button>
             </div>
         </header>
 
-        <!-- SECCIÓN DE GRÁFICOS -->
+        <!-- ========================================================== -->
+        <!-- SECCIÓN DE GRÁFICOS MODERNOS (INFOGRAFÍA SVG / BATERÍAS)   -->
+        <!-- ========================================================== -->
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-show="rows.length > 0">
-            <template x-for="(chartTitle, chartKey) in { libro: 'NODOA', curso: 'Ikasturtea Banaketa', mintegia: 'ESPARRUA', iturria: 'Informazio Iturriak (C)', egoera1: '1. Periodoko Egoera (H)', egoera2: '2. Periodoko Egoera (L)' }">
-                <div :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-4 rounded-2xl shadow-sm border flex flex-col items-center transition-colors">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider opacity-70 mb-2" x-text="chartTitle"></h3>
-                    <div class="w-full h-48 relative flex items-center justify-center">
-                        <canvas :id="'chart_' + chartKey"></canvas>
+
+            <!-- 1. NODOA: BATERÍAS VERTICALES POR NODO -->
+            <div :class="darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'" class="p-6 rounded-2xl shadow-sm border flex flex-col justify-between transition-colors">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">NODOA</span>
+                    <span class="text-xs opacity-60" x-text="chartStats.libro.length + ' nodo aktibo'"></span>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2 items-end pt-2">
+                    <template x-for="(item, idx) in chartStats.libro" :key="item.label">
+                        <div class="flex flex-col items-center gap-1.5">
+                            <div :class="darkMode ? 'bg-slate-950/70' : 'bg-slate-100'" class="w-11 h-20 rounded-lg border-2 border-dashed border-indigo-500/50 p-1 flex flex-col justify-end relative">
+                                <div class="w-4 h-1 bg-indigo-500/50 rounded-t-sm absolute -top-1.5 left-1/2 -translate-x-1/2"></div>
+                                <div class="w-full rounded-sm transition-all duration-500"
+                                     :class="['bg-gradient-to-t from-indigo-600 to-indigo-400', 'bg-gradient-to-t from-blue-600 to-cyan-400', 'bg-gradient-to-t from-teal-600 to-emerald-400', 'bg-gradient-to-t from-amber-600 to-amber-400'][idx % 4]"
+                                     :style="'height: ' + Math.max(14, item.pct) + '%'"></div>
+                                <span :class="darkMode ? 'text-white' : 'text-slate-900'" class="absolute inset-0 flex items-center justify-center text-[11px] font-black drop-shadow" x-text="item.pct + '%'"></span>
+                            </div>
+                            <span class="text-[10px] font-semibold text-center leading-tight line-clamp-1 opacity-80" :title="item.label" x-text="item.label.replace(/^[0-9.]+-\s*/, '')"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 2. IKASTURTEA BANAKETA: ANILLO SVG SECCIONADO -->
+            <div :class="darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'" class="p-6 rounded-2xl shadow-sm border flex items-center justify-between transition-colors">
+                <div class="space-y-2">
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-teal-500/10 text-teal-400 border border-teal-500/20">IKASTURTEA</span>
+                    <h3 class="text-lg font-bold" x-text="chartStats.curso[0]?.label || 'Zehaztu gabe'"></h3>
+                    <p class="text-xs opacity-60" x-text="(chartStats.curso[0]?.count || 0) + ' / ' + filteredRows.length + ' erregistro'"></p>
+                    <div class="pt-1 flex flex-wrap gap-2">
+                        <template x-for="c in chartStats.curso.slice(0, 2)" :key="c.label">
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 font-semibold" x-text="c.label + ': ' + c.pct + '%'"></span>
+                        </template>
                     </div>
                 </div>
-            </template>
+
+                <div class="relative w-28 h-28 flex items-center justify-center shrink-0">
+                    <svg class="w-28 h-28 -rotate-90 drop-shadow-[0_6px_10px_rgba(20,184,166,0.2)]" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="38" fill="transparent" :stroke="darkMode ? '#1e293b' : '#e2e8f0'" stroke-width="14" />
+                        <circle cx="50" cy="50" r="38" fill="transparent"
+                                stroke="#14b8a6"
+                                stroke-width="14"
+                                stroke-dasharray="238.76"
+                                :stroke-dashoffset="238.76 - (238.76 * ((chartStats.curso[0]?.pct || 0) / 100))"
+                                class="transition-all duration-700 ease-out" />
+                        <circle cx="50" cy="50" r="38" fill="transparent" :stroke="darkMode ? '#0f172a' : '#ffffff'" stroke-width="15" stroke-dasharray="2 21.87" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-lg font-black" x-text="(chartStats.curso[0]?.pct || 0) + '%'"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. ESPARRUA: TOP 5 BARRAS DE PROGRESO MODERNAS -->
+            <div :class="darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'" class="p-6 rounded-2xl shadow-sm border flex flex-col justify-between transition-colors">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-purple-500/10 text-purple-400 border border-purple-500/20">ESPARRUA (TOP 5)</span>
+                    <span class="text-xs font-semibold opacity-60" x-text="chartStats.esparruaTotal + ' esparru guztira'"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <template x-for="esp in chartStats.esparruaTop" :key="esp.label">
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px]">
+                                <span class="font-medium truncate max-w-[70%]" :title="esp.label" x-text="esp.label"></span>
+                                <span class="font-bold text-purple-400" x-text="esp.count + ' (' + esp.pct + '%)'"></span>
+                            </div>
+                            <div :class="darkMode ? 'bg-slate-950' : 'bg-slate-100'" class="w-full h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-500" :style="'width: ' + esp.pct + '%'"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 4. INFORMAZIO ITURRIAK (C): TARJETA RADAR + TOP FUENTES -->
+            <div :class="darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'" class="p-6 rounded-2xl shadow-sm border flex flex-col justify-between transition-colors">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">ITURRIAK (C)</span>
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <span class="text-3xl font-black text-cyan-400" x-text="chartStats.iturriaTotal"></span>
+                            <span class="text-xs opacity-60">iturri desberdin</span>
+                        </div>
+                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-lg">
+                        📡
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800/40 space-y-1.5 mt-2">
+                    <p class="text-[10px] uppercase tracking-wider opacity-50 font-bold">Iturri nagusiak:</p>
+                    <template x-for="src in chartStats.iturriaTop" :key="src.label">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="truncate max-w-[75%] opacity-85" :title="src.label" x-text="'• ' + src.label"></span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/10 text-cyan-400" x-text="src.count"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 5. 1. PERIODOKO EGOERA (H): EMBUDO ESCALONADO -->
+            <div :class="darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'" class="p-6 rounded-2xl shadow-sm border flex flex-col justify-between transition-colors">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">1. PERIODOA (H)</span>
+                    <span class="text-xs opacity-60" x-text="chartStats.egoera1.length + ' egoera'"></span>
+                </div>
+
+                <div class="flex flex-col items-center space-y-1.5 w-full">
+                    <template x-for="(st, i) in chartStats.egoera1.slice(0, 3)" :key="st.label">
+                        <div class="py-1.5 px-4 shadow-sm flex justify-between items-center text-xs font-bold transition-all duration-500"
+                             :class="[
+                                 'w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 rounded-t-xl rounded-b-sm',
+                                 'w-[84%] bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 rounded-sm',
+                                 'w-[68%] bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-b-xl rounded-t-sm'
+                             ][i]"
+                             :style="'clip-path: polygon(0 0, 100% 0, ' + (95 - i*3) + '% 100%, ' + (5 + i*3) + '% 100%);'">
+                            <span class="truncate max-w-[65%] pl-1" :title="st.label" x-text="st.label"></span>
+                            <span class="pr-1 shrink-0" x-text="st.count + ' (' + st.pct + '%)'"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- 6. 2. PERIODOKO EGOERA (L): BATERÍAS HORIZONTALES SEGMENTADAS -->
+            <div :class="darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'" class="p-6 rounded-2xl shadow-sm border flex flex-col justify-between transition-colors">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">2. PERIODOA (L)</span>
+                    <span class="text-xs opacity-60" x-text="chartStats.egoera2.length + ' egoera'"></span>
+                </div>
+
+                <div class="space-y-3">
+                    <template x-for="(st2, idx) in chartStats.egoera2.slice(0, 3)" :key="st2.label">
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs">
+                                <span class="font-semibold truncate max-w-[70%]" :title="st2.label" x-text="st2.label"></span>
+                                <span class="font-bold text-blue-400" x-text="st2.count + ' (' + st2.pct + '%)'"></span>
+                            </div>
+                            <!-- Batería horizontal con borde punteado -->
+                            <div class="flex items-center">
+                                <div :class="darkMode ? 'bg-slate-950/70' : 'bg-slate-100'" class="w-full h-4 rounded-md border border-dashed border-blue-500/50 p-0.5 flex items-center">
+                                    <div class="h-full rounded-sm transition-all duration-500"
+                                         :class="['bg-gradient-to-r from-indigo-500 to-blue-400', 'bg-gradient-to-r from-sky-500 to-cyan-400', 'bg-gradient-to-r from-emerald-500 to-teal-400'][idx % 3]"
+                                         :style="'width: ' + Math.max(6, st2.pct) + '%'"></div>
+                                </div>
+                                <div class="w-1 h-2 bg-blue-500/50 rounded-r-sm"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
         </section>
 
         <!-- PANEL DE FILTROS -->
-        <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="p-6 rounded-2xl shadow-sm border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 transition-colors">
+        <section :class="darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'" class="p-6 rounded-2xl shadow-sm border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 transition-colors">
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">NODOA</label>
-                <select x-model="selectedLibro" @change="selectedMintegia = ''; updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <select x-model="selectedLibro" @change="selectedMintegia = ''" :class="darkMode ? 'bg-slate-950 border-slate-800 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Nodo denak)</option>
                     <template x-for="libro in uniqueLibros" :key="libro">
                         <option :value="libro" x-text="libro"></option>
@@ -68,7 +216,7 @@
 
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">1. Ikasturtea (A)</label>
-                <select x-model="selectedCurso" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <select x-model="selectedCurso" :class="darkMode ? 'bg-slate-950 border-slate-800 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="curso in uniqueCursos" :key="curso">
                         <option :value="curso" x-text="curso"></option>
@@ -78,7 +226,7 @@
 
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">ESPARRUA</label>
-                <select x-model="selectedMintegia" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <select x-model="selectedMintegia" :class="darkMode ? 'bg-slate-950 border-slate-800 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="mintegia in uniqueMintegias" :key="mintegia">
                         <option :value="mintegia" x-text="mintegia"></option>
@@ -88,7 +236,7 @@
 
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">3. Egoera 1. Periodoa (H)</label>
-                <select x-model="selectedEgoera1" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <select x-model="selectedEgoera1" :class="darkMode ? 'bg-slate-950 border-slate-800 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="eg in uniqueEgoera1" :key="eg">
                         <option :value="eg" x-text="eg"></option>
@@ -98,7 +246,7 @@
 
             <div>
                 <label class="block text-xs font-semibold opacity-70 uppercase tracking-wider mb-2">4. Egoera 2. Periodoa (L)</label>
-                <select x-model="selectedEgoera2" @change="updateCharts()" :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                <select x-model="selectedEgoera2" :class="darkMode ? 'bg-slate-950 border-slate-800 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'" class="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
                     <option value="">Guztiak (Denak)</option>
                     <template x-for="eg in uniqueEgoera2" :key="eg">
                         <option :value="eg" x-text="eg"></option>
@@ -113,11 +261,11 @@
         </div>
 
         <!-- TABLA DE RESULTADOS -->
-        <section :class="darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'" class="rounded-2xl shadow-sm border overflow-hidden transition-colors">
+        <section :class="darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'" class="rounded-2xl shadow-sm border overflow-hidden transition-colors">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr :class="darkMode ? 'bg-slate-900 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-100 text-slate-500'" class="border-b text-xs font-bold uppercase tracking-wider">
+                        <tr :class="darkMode ? 'bg-slate-950/60 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'" class="border-b text-xs font-bold uppercase tracking-wider">
                             <th class="p-4">NODOA</th>
                             <th class="p-4">Ikasturtea</th>
                             <th class="p-4">ESPARRUA</th>
@@ -128,25 +276,25 @@
                             <th class="p-4">Egoera 2 (L)</th>
                         </tr>
                     </thead>
-                    <tbody :class="darkMode ? 'divide-slate-700' : 'divide-slate-100'" class="divide-y text-sm">
+                    <tbody :class="darkMode ? 'divide-slate-800' : 'divide-slate-100'" class="divide-y text-sm">
                         <template x-for="row in filteredRows" :key="row.id">
-                            <tr :class="darkMode ? 'hover:bg-slate-700/50' : 'hover:bg-slate-50/50'" class="transition">
+                            <tr :class="darkMode ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50/70'" class="transition">
                                 <td class="p-4">
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-500" x-text="row.libro"></span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" x-text="row.libro"></span>
                                 </td>
                                 <td class="p-4 font-medium" x-text="row.curso"></td>
-                                <td class="p-4 font-semibold text-slate-700 dark:text-slate-300" x-text="row.mintegia"></td>
+                                <td class="p-4 font-semibold" x-text="row.mintegia"></td>
                                 <td class="p-4">
                                     <div class="text-xs text-indigo-400 font-medium" x-text="'Iturria: ' + row.iturria"></div>
                                     <a :href="row.link" target="_blank" class="text-xs opacity-60 hover:underline truncate block max-w-xs mt-1" x-text="row.link"></a>
                                 </td>
                                 <td class="p-4 opacity-80" x-text="row.jarraipena1"></td>
                                 <td class="p-4">
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500" x-text="row.egoera1"></span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20" x-text="row.egoera1 || '-'"></span>
                                 </td>
                                 <td class="p-4 opacity-80" x-text="row.jarraipena2"></td>
                                 <td class="p-4">
-                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500" x-text="row.egoera2"></span>
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20" x-text="row.egoera2 || '-'"></span>
                                 </td>
                             </tr>
                         </template>
@@ -168,13 +316,12 @@
         function dashboardData() {
             return {
                 rows: [],
-                darkMode: false,
+                darkMode: true,
                 selectedLibro: '',
                 selectedCurso: '',
                 selectedMintegia: '',
                 selectedEgoera1: '',
                 selectedEgoera2: '',
-                charts: {},
 
                 init() {
                     this.loadAllGoogleSheets();
@@ -193,7 +340,6 @@
                     for (let sheetIndex = 0; sheetIndex < sheetsConfig.length; sheetIndex++) {
                         const sheet = sheetsConfig[sheetIndex];
                         try {
-                            // Descargar directamente sin proxy intermediario
                             const response = await fetch(sheet.url);
                             const csvText = await response.text();
 
@@ -244,7 +390,6 @@
                     }
 
                     this.rows = allParsedData;
-                    setTimeout(() => this.initCharts(), 150);
                 },
 
                 get uniqueLibros() { return [...new Set(this.rows.map(r => r.libro))].filter(Boolean).sort(); },
@@ -271,86 +416,43 @@
                     });
                 },
 
-                initCharts() {
-                    const dataToUse = this.filteredRows;
-                    const keys = ['libro', 'curso', 'mintegia', 'iturria', 'egoera1', 'egoera2'];
+                // Estadísticas reactivas para los 6 gráficos modernos
+                get chartStats() {
+                    const data = this.filteredRows;
+                    const total = data.length;
 
-                    const centerTextPlugin = {
-                        id: 'centerText',
-                        beforeDraw(chart) {
-                            const { width, height, ctx } = chart;
-                            ctx.restore();
-                            const fontSize = (height / 110).toFixed(2);
-                            ctx.font = `bold ${fontSize}em sans-serif`;
-                            ctx.textBaseline = 'middle';
-                            ctx.fillStyle = chart.options.plugins.centerText.color || '#334155';
-
-                            const text = chart.options.plugins.centerText.text || '';
-                            const textX = Math.round((width - ctx.measureText(text).width) / 2);
-                            const textY = height / 2 - 4;
-
-                            ctx.fillText(text, textX, textY);
-                            ctx.save();
-                        }
-                    };
-
-                    keys.forEach(key => {
+                    const groupBy = (key) => {
                         const counts = {};
-                        dataToUse.forEach(r => {
+                        data.forEach(r => {
                             const val = (r[key] && r[key] !== '') ? r[key] : 'Zehaztu gabe';
                             counts[val] = (counts[val] || 0) + 1;
                         });
+                        return Object.entries(counts)
+                            .map(([label, count]) => ({
+                                label,
+                                count,
+                                pct: total ? Math.round((count / total) * 100) : 0
+                            }))
+                            .sort((a, b) => b.count - a.count);
+                    };
 
-                        const uniqueCount = Object.keys(counts).length;
-                        const canvasId = 'chart_' + key;
-                        const ctx = document.getElementById(canvasId);
-                        if (!ctx) return;
+                    const libro = groupBy('libro');
+                    const curso = groupBy('curso');
+                    const esparrua = groupBy('mintegia');
+                    const iturria = groupBy('iturria');
+                    const egoera1 = groupBy('egoera1');
+                    const egoera2 = groupBy('egoera2');
 
-                        if (this.charts[key]) {
-                            this.charts[key].destroy();
-                        }
-
-                        this.charts[key] = new Chart(ctx, {
-                            type: 'doughnut',
-                            data: {
-                                labels: Object.keys(counts),
-                                datasets: [{
-                                    data: Object.values(counts),
-                                    backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f43f5e', '#a855f7'],
-                                    borderWidth: 2,
-                                    borderColor: this.darkMode ? '#1e293b' : '#ffffff'
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                cutout: '70%',
-                                plugins: {
-                                    legend: { display: false },
-                                    centerText: {
-                                        text: uniqueCount.toString(),
-                                        color: this.darkMode ? '#f8fafc' : '#1e293b'
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                const label = context.label || '';
-                                                const value = context.parsed || 0;
-                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                                const percentage = ((value / total) * 100).toFixed(1) + '%';
-                                                return ` ${label}: ${value} erregistro (${percentage})`;
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            plugins: [centerTextPlugin]
-                        });
-                    });
-                },
-
-                updateCharts() {
-                    this.initCharts();
+                    return {
+                        libro,
+                        curso,
+                        esparruaTotal: esparrua.length,
+                        esparruaTop: esparrua.slice(0, 5),
+                        iturriaTotal: iturria.length,
+                        iturriaTop: iturria.slice(0, 3),
+                        egoera1,
+                        egoera2
+                    };
                 }
             }
         }
